@@ -1,0 +1,33 @@
+{
+  "name": "Simple Command for Detach Attach Tabs",
+  "description": "Press Alt+Shift+D to detach the tab to new window.",
+  "homepage_url": "https://github.com/i5on9i/crazycmd",
+  "manifest_version": 2,
+  "version": "1.0",
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "coosal@duck.com"
+    }
+  },
+
+  "background": {
+    "scripts": ["background.js"]
+  },
+
+  "commands": {
+    "detach-to-window": {
+      "suggested_key": { "default": "Alt+Shift+D" },
+      "description": "Send a 'detach-to-window' event to the extension"
+    },
+    "merge-to-window": {
+      "suggested_key": { "default": "Alt+Shift+A" },
+      "description": "Send a 'detach-to-window' event to the extension"
+    }
+  },
+
+  "options_ui": {
+    "page": "options.html",
+    "browser_style": true
+  }
+}

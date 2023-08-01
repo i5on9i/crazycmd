@@ -1,3 +1,58 @@
+const COMMAND_DETACH_TO_WINDOW = "detach-to-window"
+const COMMAND_MERGE_INTO_WINDOW = "merge-into-window"
+const COMMAND_RESIZE_WINDOW = "resize-window"
+const COMMAND_DETACH_AND_RESIZE_WINDOW = "detach-and-resize-window"
+
+
+
+function runDetachResizeWindow() {
+  // ref: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/Tabs/query
+  browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const activeTab = tabs[0];
+    if (activeTab) {
+      browser.windows.create({ tabId: activeTab.id }).then((window) => {
+        let updateInfo = {
+          width: Math.floor(window.width / 2),
+          // height: currentWindow.height
+        };
+
+        browser.windows.update(window.id, updateInfo);
+      });
+    }
+  })
+}
+
+
+function runDetachWindow() {
+  // ref: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/Tabs/query
+  browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const activeTab = tabs[0];
+    if (activeTab) {
+      browser.windows.create({ tabId: activeTab.id })
+    }
+  })
+}
+
+function runMergeIntoWindow() {
+  browser.tabs.query({ currentWindow: true }, (curTabs) => {
+    const tabIds = curTabs.map((curTab) => curTab.id)
+
+    browser.tabs.query({ windowId: 1 }, (tabs) => {
+      browser.tabs.move(tabIds, { windowId: 1, index: tabs.length })
+    });
+  })
+}
+
+function runResizeWindow() {
+  browser.windows.getCurrent().then((currentWindow) => {
+    let updateInfo = {
+      width: Math.floor(currentWindow.width / 2),
+      // height: currentWindow.height
+    };
+
+    browser.windows.update(currentWindow.id, updateInfo);
+  });
+}
 /**
  * Returns all of the registered extension commands for this extension
  * and their shortcut (if active).
@@ -26,27 +81,22 @@ gettingAllCommands.then((commands) => {
  * On Mac, this command will automatically be converted to "Command+Shift+U".
  */
 browser.commands.onCommand.addListener((command) => {
-  if (command === 'detach-to-window') {
-    // ref: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/Tabs/query
-    browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const activeTab = tabs[0];
-      if (activeTab) {
-        browser.windows.create({ tabId: activeTab.id });
-      }
-    })
-  }
-  if (command === 'merge-to-window') {
-    // ref: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/Tabs/query
-    browser.tabs.query({ currentWindow: true }, (curTabs) => {
-      const tabIds = curTabs.map((curTab) => curTab.id)
-
-      browser.tabs.query({ windowId: 1 }, (tabs) => {
-        browser.tabs.move(tabIds, {windowId: 1, index: tabs.length})  
-      });
-    })
-  }
+  const cmdFunc = getCommandFunc(command)
+  cmdFunc()
 })
 
+function getCommandFunc(command){
+  switch (command) {
+    case COMMAND_DETACH_TO_WINDOW:
+      return runDetachWindow
+    case COMMAND_MERGE_INTO_WINDOW:
+      return runMergeIntoWindow
+    case COMMAND_RESIZE_WINDOW:
+      return runResizeWindow
+    case COMMAND_DETACH_AND_RESIZE_WINDOW:
+      return runDetachResizeWindow
+  }
+}
 
 browser.tabs.onDetached.addListener((tabId, detachInfo) => {
   // console.log(detachInfo.oldWindowId)

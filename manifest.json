@@ -3,7 +3,7 @@
   "description": "Press Alt+Shift+D to detach the tab to new window.",
   "homepage_url": "https://github.com/i5on9i/crazycmd",
   "manifest_version": 2,
-  "version": "1.0",
+  "version": "1.1.2",
 
   "browser_specific_settings": {
     "gecko": {
@@ -16,13 +16,21 @@
   },
 
   "commands": {
+    "detach-and-resize-window": {
+      "suggested_key": { "default": "Alt+Shift+W" },
+      "description": "resize window"
+    },
     "detach-to-window": {
       "suggested_key": { "default": "Alt+Shift+D" },
       "description": "Send a 'detach-to-window' event to the extension"
     },
-    "merge-to-window": {
+    "merge-into-window": {
       "suggested_key": { "default": "Alt+Shift+A" },
       "description": "Send a 'detach-to-window' event to the extension"
+    },
+    "resize-window": {
+      "suggested_key": { "default": "Alt+Shift+R" },
+      "description": "resize window"
     }
   },
 

@@ -2,7 +2,8 @@ const COMMAND_DETACH_TO_WINDOW = "detach-to-window"
 const COMMAND_MERGE_INTO_WINDOW = "merge-into-window"
 const COMMAND_RESIZE_WINDOW = "resize-window"
 const COMMAND_DETACH_AND_RESIZE_WINDOW = "detach-and-resize-window"
-
+let lastFocusedWindowId = browser.windows.WINDOW_ID_NONE
+let curWindowId = browser.windows.WINDOW_ID_NONE
 
 
 function runDetachResizeWindow() {
@@ -37,9 +38,12 @@ function runMergeIntoWindow() {
   browser.tabs.query({ currentWindow: true }, (curTabs) => {
     const tabIds = curTabs.map((curTab) => curTab.id)
 
-    browser.tabs.query({ windowId: 1 }, (tabs) => {
-      browser.tabs.move(tabIds, { windowId: 1, index: tabs.length })
+    // to get the tabs count
+    browser.tabs.query({ windowId: lastFocusedWindowId }, (tabs) => {
+      // to merge
+      browser.tabs.move(tabIds, { windowId: lastFocusedWindowId, index: tabs.length })
     });
+
   })
 }
 
@@ -85,7 +89,7 @@ browser.commands.onCommand.addListener((command) => {
   cmdFunc()
 })
 
-function getCommandFunc(command){
+function getCommandFunc(command) {
   switch (command) {
     case COMMAND_DETACH_TO_WINDOW:
       return runDetachWindow
@@ -101,3 +105,12 @@ function getCommandFunc(command){
 browser.tabs.onDetached.addListener((tabId, detachInfo) => {
   // console.log(detachInfo.oldWindowId)
 });
+
+
+browser.windows.onFocusChanged.addListener((newWindowId) => {
+  if(newWindowId === browser.windows.WINDOW_ID_NONE ){
+    return
+  }
+  lastFocusedWindowId = curWindowId
+  curWindowId = newWindowId
+})

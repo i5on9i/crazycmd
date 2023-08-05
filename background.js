@@ -2,6 +2,7 @@ const COMMAND_DETACH_TO_WINDOW = "detach-to-window"
 const COMMAND_MERGE_INTO_WINDOW = "merge-into-window"
 const COMMAND_RESIZE_WINDOW = "resize-window"
 const COMMAND_DETACH_AND_RESIZE_WINDOW = "detach-and-resize-window"
+const COMMAND_DETACH_DUP_TAB_TO_WINDOW = "detach-duplicate-tab-to-window"
 let lastFocusedWindowId = browser.windows.WINDOW_ID_NONE
 let curWindowId = browser.windows.WINDOW_ID_NONE
 
@@ -19,6 +20,25 @@ function runDetachResizeWindow() {
 
         browser.windows.update(window.id, updateInfo);
       });
+    }
+  })
+}
+
+function runDetachDuplicateTabToWindow() {
+  // ref: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/Tabs/query
+  browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+
+    const activeTab = tabs[0];
+    if (activeTab) {
+      browser.tabs.create({ url: activeTab.url, active: false }).then((newTab) => {
+        browser.windows.create({ tabId: newTab.id }).then((window) => {
+          let updateInfo = {
+            width: Math.floor(window.width / 2),
+            // height: currentWindow.height
+          };
+          browser.windows.update(window.id, updateInfo);
+        })
+      })
     }
   })
 }
@@ -99,6 +119,8 @@ function getCommandFunc(command) {
       return runResizeWindow
     case COMMAND_DETACH_AND_RESIZE_WINDOW:
       return runDetachResizeWindow
+    case COMMAND_DETACH_DUP_TAB_TO_WINDOW:
+      return runDetachDuplicateTabToWindow
   }
 }
 
@@ -108,7 +130,7 @@ browser.tabs.onDetached.addListener((tabId, detachInfo) => {
 
 
 browser.windows.onFocusChanged.addListener((newWindowId) => {
-  if(newWindowId === browser.windows.WINDOW_ID_NONE ){
+  if (newWindowId === browser.windows.WINDOW_ID_NONE) {
     return
   }
   lastFocusedWindowId = curWindowId

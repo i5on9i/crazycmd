@@ -8,9 +8,7 @@ async function updateUI() {
   // commands defined in `manifest.json`
   let commands = await browser.commands.getAll();
   for (let command of commands) {
-    if (command.name === commandName) {
-      document.querySelector(`.cmdline[data-cmdid=${commandName}] input`).value = command.shortcut
-    }
+    document.querySelector(`.cmdline[data-cmdid=${command.name}] input`).value = command.shortcut
   }
 }
 
@@ -18,9 +16,10 @@ async function updateUI() {
  * Update the shortcut based on the value in the textbox.
  */
 async function updateShortcut(evt) {
+  const pel = evt.target.parentElement
   await browser.commands.update({
-    name: evt.target.dataset.cmdid,
-    shortcut: evt.target.querySelector('input').value
+    name: pel.dataset.cmdid,
+    shortcut: pel.querySelector('input').value
   });
 }
 
@@ -29,7 +28,7 @@ async function updateShortcut(evt) {
  */
 async function resetShortcut() {
   await browser.commands.reset(commandName);
-  updateUI();
+  // updateUI();
 }
 
 /**
@@ -40,5 +39,8 @@ document.addEventListener('DOMContentLoaded', updateUI);
 /**
  * Handle update and reset button clicks
  */
-document.querySelector('div.cmdline .update').addEventListener('click', updateShortcut)
-document.querySelector('div.cmdline .reset').addEventListener('click', resetShortcut)
+const nodelist = document.querySelectorAll('div.cmdline')
+for (let i = 0; i < nodelist.length; i++) {
+  nodelist[i].querySelector('.update').addEventListener('click', updateShortcut)
+  nodelist[i].querySelector('.reset').addEventListener('click', resetShortcut)
+}
